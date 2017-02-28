@@ -5,6 +5,7 @@ public class MyUIManager : MonoBehaviour
 {
     public  UILabel loadingLabel;
     public  UIPanel loadingPanel;
+    public UIPanel  loginPanel;
     public UIEventListener LoginBtn;
 	// Use this for initialization
 	void Start () 
@@ -16,6 +17,7 @@ public class MyUIManager : MonoBehaviour
         LoginBtn.onClick += (GameObject g) =>
         {
             print("Login");
+            StartCoroutine(LoadingAnimation());
         };
     }
 
