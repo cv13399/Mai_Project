@@ -79,7 +79,7 @@ public class UIAnchor : MonoBehaviour
 	void Awake ()
 	{
 		mTrans = transform;
-		mAnim = animation;
+		mAnim = GetComponent<Animation>();
 	}
 
 	/// <summary>
