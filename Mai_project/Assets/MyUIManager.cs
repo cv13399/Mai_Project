@@ -16,12 +16,16 @@ public class MyUIManager : MonoBehaviour
 
     public GoogleMap gmp;
 
+    public GameObject BG;
+
     bool isPassed = true;
 
 	void Start () 
     {
+        googleMapPanel.transform.position = new Vector3( googleMapPanel.transform.position.x, googleMapPanel.transform.position.y,1000);
         ButtonEventInitialize();
-        //  +StartCoroutine(LocationConfirm());
+        //StartCoroutine(LocationConfirm());
+        gmp.Refresh();
 	}
     void ButtonEventInitialize()
     {
@@ -33,6 +37,7 @@ public class MyUIManager : MonoBehaviour
         {
             googleMapPanel.gameObject.SetActive(false);
             gameSelectPanel.gameObject.SetActive(true);
+            BG.SetActive(true);
         };
         for(uint i=0; i < gameSelectBtn.Length; i++)
             gameSelectBtn[i].onClick += (GameObject g) =>
@@ -43,8 +48,10 @@ public class MyUIManager : MonoBehaviour
     void OnGameSelected(GameObject mg)
     {
         print("Game selected");
+        BG.SetActive(false);
         gameSelectPanel.gameObject.SetActive(false);
         googleMapPanel.gameObject.SetActive(true);
+        googleMapPanel.transform.position = new Vector3( googleMapPanel.transform.position.x, googleMapPanel.transform.position.y,0);
     }
     
     public IEnumerator LoadingAnimation()
@@ -100,12 +107,14 @@ public class MyUIManager : MonoBehaviour
         if (maxWait < 1)
         {
             print("Timed out");
+            StartCoroutine(LocationConfirm());
             yield break;
         }
 		 // Connection has failed
         if (Input.location.status == LocationServiceStatus.Failed)
         {
             print("Unable to determine device location");
+            StartCoroutine(LocationConfirm());
             yield break;
         }
         else
@@ -114,7 +123,7 @@ public class MyUIManager : MonoBehaviour
             print("Location: " + Input.location.lastData.latitude + " " + Input.location.lastData.longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
 			gmp.centerLocation.longitude = Input.location.lastData.longitude;
 			gmp.centerLocation.latitude = Input.location.lastData.latitude;
-			gmp.Refresh();
+			gmp.Refresh();          
             isPassed = true;
         }
 
