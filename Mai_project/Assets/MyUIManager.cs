@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+
+public class UserInfo
+{
+    public string userName = "";
+    public string userID = "";
+}
 
 public class MyUIManager : MonoBehaviour 
 {
@@ -19,9 +26,7 @@ public class MyUIManager : MonoBehaviour
     public GoogleMap gmp;
 
     public GameObject BG;
-
-
-    string userName = "";
+    public UserInfo user = new UserInfo();
 
 	void Start () 
     {
@@ -125,10 +130,14 @@ public class MyUIManager : MonoBehaviour
         Input.location.Stop();
 
 	}
-    public void OnConnected(string name)
+    //google plus call back to unity
+    public void OnConnected(string data)
     {
-        userName = name;
-        nameLabel.text = name;
+        string[] seperators = new string[] { "/" };
+        string[] info = data.Split(seperators, StringSplitOptions.RemoveEmptyEntries);
+        user.userName = info[0];
+        user.userID = info[1];
+        nameLabel.text = "Hi "+user.userName;
         AfterLogin();
     }
     public void OnGoogleLogin()
