@@ -37,14 +37,14 @@ public class GoogleMap : MonoBehaviour
 		var qs = "";
 		if (!autoLocateCenter) {
 			if (centerLocation.address != "")
-				qs += "center=" + HTTP.URL.Encode (centerLocation.address);
+				qs += "center=" + WWW.EscapeURL(centerLocation.address);
 			else {
-				qs += "center=" + HTTP.URL.Encode (string.Format ("{0},{1}", centerLocation.latitude, centerLocation.longitude));
+				qs += "center=" + WWW.EscapeURL(string.Format ("{0},{1}", centerLocation.latitude, centerLocation.longitude));
 			}
 		
 			qs += "&zoom=" + zoom.ToString ();
 		}
-		qs += "&size=" + HTTP.URL.Encode (string.Format ("{0}x{0}", size));
+		qs += "&size=" + WWW.EscapeURL(string.Format ("{0}x{0}", size));
 		qs += "&scale=" + (doubleResolution ? "2" : "1");
 		qs += "&maptype=" + mapType.ToString ().ToLower ();
 		var usingSensor = false;
@@ -57,9 +57,9 @@ public class GoogleMap : MonoBehaviour
 			qs += "&markers=" + string.Format ("size:{0}|color:{1}|label:{2}", i.size.ToString ().ToLower (), i.color, i.label);
 			foreach (var loc in i.locations) {
 				if (loc.address != "")
-					qs += "|" + HTTP.URL.Encode (loc.address);
+					qs += "|" + WWW.EscapeURL(loc.address);
 				else
-					qs += "|" + HTTP.URL.Encode (string.Format ("{0},{1}", loc.latitude, loc.longitude));
+					qs += "|" + WWW.EscapeURL(string.Format ("{0},{1}", loc.latitude, loc.longitude));
 			}
 		}
 		
@@ -68,23 +68,18 @@ public class GoogleMap : MonoBehaviour
 			if(i.fill) qs += "|fillcolor:" + i.fillColor;
 			foreach (var loc in i.locations) {
 				if (loc.address != "")
-					qs += "|" + HTTP.URL.Encode (loc.address);
+					qs += "|" + WWW.EscapeURL(loc.address);
 				else
-					qs += "|" + HTTP.URL.Encode (string.Format ("{0},{1}", loc.latitude, loc.longitude));
+					qs += "|" + WWW.EscapeURL(string.Format ("{0},{1}", loc.latitude, loc.longitude));
 			}
 		}
 		
 		
-		var req = new HTTP.Request ("GET", url + "?" + qs, true);
-		req.Send ();
-		while (!req.isDone)
-			yield return null;
-		if (req.exception == null) {
-			var tex = new Texture2D (size, size);
-			tex.LoadImage (req.response.Bytes);
-			GetComponent<UITexture>().mainTexture = tex;
-		}
-	}
+		var req = new WWW( url + "?" + qs);
+        yield return req;
+        GetComponent<UITexture>().mainTexture = req.texture;
+    }
+	
 	
 	
 }

@@ -4,13 +4,15 @@ using System.Collections;
 public class MyUIManager : MonoBehaviour 
 {
     public UILabel loadingLabel;
+    public UILabel nameLabel;
 
     public UIPanel loadingPanel;
     public UIPanel loginPanel;
     public UIPanel gameSelectPanel;
     public UIPanel googleMapPanel;
 
-    public UIEventListener LoginBtn;
+    public UIEventListener GoogleLoginBtn;
+    public UIEventListener FbLoginBtn;
     public UIEventListener exitMapBtn;
     public UIEventListener[] gameSelectBtn;
 
@@ -18,7 +20,8 @@ public class MyUIManager : MonoBehaviour
 
     public GameObject BG;
 
-    bool isPassed = true;
+
+    string userName = "";
 
 	void Start () 
     {
@@ -29,9 +32,10 @@ public class MyUIManager : MonoBehaviour
 	}
     void ButtonEventInitialize()
     {
-        LoginBtn.onClick += (GameObject g) =>
+        GoogleLoginBtn.onClick += (GameObject g) =>
         {
-         StartCoroutine(OnLogin());
+            //StartCoroutine(OnLogin());
+            OnGoogleLogin();
         };
         exitMapBtn.onClick += (GameObject g) =>
         {
@@ -39,11 +43,11 @@ public class MyUIManager : MonoBehaviour
             gameSelectPanel.gameObject.SetActive(true);
             BG.SetActive(true);
         };
-        for(uint i=0; i < gameSelectBtn.Length; i++)
-            gameSelectBtn[i].onClick += (GameObject g) =>
-            {
-                OnGameSelected(g);
-            };
+        for(short i=0; i < gameSelectBtn.Length; i++)
+        gameSelectBtn[i].onClick += (GameObject g) =>
+        {
+            OnGameSelected(g);
+        };
     }
     void OnGameSelected(GameObject mg)
     {
@@ -57,33 +61,24 @@ public class MyUIManager : MonoBehaviour
     public IEnumerator LoadingAnimation()
     {     
         string[] text = new string[] { "Loading", "Loading.", "Loading..", "Loading..." ,"Loading","Loading.","Loading..","Loading..."};
-        for (int i = 0; i < text.Length; i++)
+        for (short i = 0; i < text.Length; i++)
         {
             loadingLabel.text = text[i];
             yield return new WaitForSeconds(0.4f);      
         }
-        if(!isPassed)
         StartCoroutine(LoadingAnimation());
     }
-    public IEnumerator OnLogin()
+    public void AfterLogin()
+    {  
+        StopCoroutine(LoadingAnimation());
+        gameSelectPanel.gameObject.SetActive(true); 
+        loadingPanel.gameObject.SetActive(false);
+    }
+    public void BeforeLogin()
     {
-        print("Login");
         loadingPanel.gameObject.SetActive(true);
-        loginPanel.gameObject.SetActive(false);      
+        loginPanel.gameObject.SetActive(false);
         StartCoroutine(LoadingAnimation());
-        yield return new WaitForSeconds(1.5f);
-        if (isPassed)
-        {
-            StopCoroutine(LoadingAnimation());
-            gameSelectPanel.gameObject.SetActive(true); 
-            loadingPanel.gameObject.SetActive(false);
-        }
-        else
-        {
-             StopCoroutine(LoadingAnimation());
-             StartCoroutine(LoadingAnimation());
-        }
-        yield return null;
     }
 
     public IEnumerator  LocationConfirm()
@@ -124,11 +119,24 @@ public class MyUIManager : MonoBehaviour
 			gmp.centerLocation.longitude = Input.location.lastData.longitude;
 			gmp.centerLocation.latitude = Input.location.lastData.latitude;
 			gmp.Refresh();          
-            isPassed = true;
         }
 
         // Stop service if there is no need to query location updates continuously
         Input.location.Stop();
 
 	}
+    public void OnConnected(string name)
+    {
+        userName = name;
+        nameLabel.text = name;
+        AfterLogin();
+    }
+    public void OnGoogleLogin()
+    {
+        BeforeLogin();
+        using (AndroidJavaClass unity = new AndroidJavaClass("com.test.tw.test.MyDialog"))
+        {
+            unity.CallStatic("Login", this.gameObject.name, "OnConnected");
+        }
+    }
 }
